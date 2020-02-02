@@ -1,0 +1,11 @@
+#set($inputRoot = $input.path('$'))
+{
+    "incidentId" : "$inputRoot.Item.incidentId.S",
+    "country" : "$inputRoot.Item.details.M.country.S",
+    "deviceId" : "$inputRoot.Item.details.M.deviceId.S",
+    "latitude" : "$inputRoot.Item.details.M.latitude.S",
+    "longitude" : "$inputRoot.Item.details.M.longitude.S",
+    "speed" : "$inputRoot.Item.details.M.speed.N",
+    "timestamp" : "$inputRoot.Item.details.M.timestamp.S"
+    
+}

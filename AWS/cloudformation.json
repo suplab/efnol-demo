@@ -1,0 +1,435 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "efnol api template",
+  "Resources": {
+    "DynamanoDBRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+          "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+        ],
+        "MaxSessionDuration": "3600",
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "VisualEditor0",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:ListTables",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:DescribeContributorInsights",
+                    "dynamodb:RestoreTableToPointInTime",
+                    "dynamodb:PurchaseReservedCapacityOfferings",
+                    "dynamodb:ListTagsOfResource",
+                    "dynamodb:CreateTableReplica",
+                    "dynamodb:UpdateContributorInsights",
+                    "dynamodb:UpdateGlobalTable",
+                    "dynamodb:CreateBackup",
+                    "dynamodb:DeleteTable",
+                    "dynamodb:UpdateTableReplicaAutoScaling",
+                    "dynamodb:UpdateContinuousBackups",
+                    "dynamodb:DescribeReservedCapacityOfferings",
+                    "dynamodb:DescribeTable",
+                    "dynamodb:GetItem",
+                    "dynamodb:DescribeContinuousBackups",
+                    "dynamodb:CreateGlobalTable",
+                    "dynamodb:DescribeLimits",
+                    "dynamodb:BatchGetItem",
+                    "dynamodb:UpdateTimeToLive",
+                    "dynamodb:BatchWriteItem",
+                    "dynamodb:ConditionCheckItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:ListBackups",
+                    "dynamodb:Scan",
+                    "dynamodb:Query",
+                    "dynamodb:DescribeStream",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteTableReplica",
+                    "dynamodb:DescribeTimeToLive",
+                    "dynamodb:ListStreams",
+                    "dynamodb:CreateTable",
+                    "dynamodb:UpdateGlobalTableSettings",
+                    "dynamodb:ListContributorInsights",
+                    "dynamodb:DescribeGlobalTableSettings",
+                    "dynamodb:ListGlobalTables",
+                    "dynamodb:GetShardIterator",
+                    "dynamodb:DescribeGlobalTable",
+                    "dynamodb:DescribeReservedCapacity",
+                    "dynamodb:RestoreTableFromBackup",
+                    "dynamodb:DescribeBackup",
+                    "dynamodb:DeleteBackup",
+                    "dynamodb:UpdateTable",
+                    "dynamodb:GetRecords",
+                    "dynamodb:DescribeTableReplicaAutoScaling"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            },
+            "PolicyName": "DynamoDBDemon"
+          }
+        ],
+        "RoleName": "DynamanoDBRole"
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "createTempoClaimRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "MaxSessionDuration": "3600",
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "lambda:InvokeFunction",
+                  "Resource": "arn:aws:lambda:eu-west-3:182388080935:function:publishNewIncident*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:DescribeStream",
+                    "dynamodb:GetRecords",
+                    "dynamodb:GetShardIterator",
+                    "dynamodb:ListStreams"
+                  ],
+                  "Resource": "arn:aws:dynamodb:eu-west-3:182388080935:table/incidentDetailTable/stream/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:*"
+                  ],
+                  "Resource": [
+                    "arn:aws:dynamodb:eu-west-3:182388080935:table/claimDetailsTable"
+                  ]
+                }
+              ]
+            },
+            "PolicyName": "publishNewIncidentPolicy"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "iotToDynamoRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "iot.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "MaxSessionDuration": "3600",
+        "Path": "/service-role/",
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": {
+                "Effect": "Allow",
+                "Action": "dynamodb:PutItem",
+                "Resource": "arn:aws:dynamodb:eu-west-3:182388080935:table/incidentDetailTable"
+              }
+            },
+            "PolicyName": "aws-iot-role-dynamoPut_-2144448653"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "sendMailRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "MaxSessionDuration": "3600",
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "lambda:InvokeFunction",
+                  "Resource": "arn:aws:lambda:eu-west-3:182388080935:function:publishTempClaimEmail*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:DescribeStream",
+                    "dynamodb:GetRecords",
+                    "dynamodb:GetShardIterator",
+                    "dynamodb:ListStreams"
+                  ],
+                  "Resource": "arn:aws:dynamodb:eu-west-3:182388080935:table/claimDetailsTable/stream/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ses:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:*"
+                  ],
+                  "Resource": [
+                    "arn:aws:dynamodb:eu-west-3:182388080935:table/claimDetailsTable"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:*"
+                  ],
+                  "Resource": [
+                    "arn:aws:dynamodb:eu-west-3:182388080935:table/incidentDetailTable"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:*"
+                  ],
+                  "Resource": [
+                    "arn:aws:dynamodb:eu-west-3:182388080935:table/deviceDetailTable"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:*"
+                  ],
+                  "Resource": [
+                    "arn:aws:dynamodb:eu-west-3:182388080935:table/policyDetailsTable"
+                  ]
+                }
+              ]
+            },
+            "PolicyName": "sendEmailPolicy"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "publishNewIncident": {
+      "Properties": {
+        "Code": {
+          "ZipFile": "console.log('Loading function');\nconst AWS = require('aws-sdk');\nconst dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});\n \nexports.handler = (event, context, callback) => {\n\n    event.Records.forEach((record) => {\n        console.log('Stream record: ', JSON.stringify(record, null, 2));\n        \n        if (record.eventName == 'INSERT') {\n            var incidentId = record.dynamodb.NewImage.incidentId.S;\n            var claimNumber = Math.floor(100000000000 + Math.random() * 900000000000).toString();\n            \n            dynamodb.putItem({\n        TableName: \"claimDetailsTable\",\n        Item: {\n            \"claimNumber\": {\n                S: claimNumber\n            },\n            \"incidentId\":{\n                S : incidentId\n            }\n        }\n    }, function(err, data) {\n        if (err) {\n            console.log(err, err.stack);\n            callback(null, {\n                statusCode: '500',\n                body: err\n            });\n        } else {\n            callback(null, {\n                statusCode: '200',\n                body: 'Hello!'\n            });\n        }\n    });\n            \n        }\n    });\n    callback(null, `Successfully processed ${event.Records.length} records.`);\n}; \n"
+        },
+        "Description": "An Amazon DynamoDB trigger that logs the updates made to a table.",
+        "FunctionName": "publishNewIncident",
+        "Handler": "index.handler",
+        "Role": "arn:aws:iam::182388080935:role/createTempoClaimRole",
+        "Runtime": "nodejs10.x"
+      },
+      "Type": "AWS::Lambda::Function"
+    },
+    "sendTempoClaimEmail": {
+      "Properties": {
+        "Code": {
+          "ZipFile": "var aws = require('aws-sdk');\nvar ses = new aws.SES({region: 'eu-west-1'});\n\nexports.handler = (event, context, callback) => {\n\nevent.Records.forEach((record) => {\nconsole.log('Stream record: ', JSON.stringify(record, null, 2));\n\nif (record.eventName == 'INSERT') {\nvar incidentId = record.dynamodb.NewImage.incidentId.S;\nvar claimNumber = record.dynamodb.NewImage.claimNumber.S;\n            var body = \"<!DOCTYPE html><html><head></head><body><p>Hi,<br>This is to inform you that an auto accident claim has been raised against a reported incident \"+incidentId+\n\".<br> The generated temporary claim number for your reference is <strong>\"+ claimNumber+\"</strong>.</p>\"+\n                       \"<br><p>Thanks and Regards,<br>AXA EFNOL Mailer</p>\"+\n                       \"<br><br><p><i>**This is an auto-generated mail. Kindly do not reply to this mail**</i><p></body></html>\";\n            var subject = incidentId + \" - AccidentClaim Raised\";\n            var emailParam = {\n                Destination: {\n                    ToAddresses: [\"suplab.debnath@cognizant.com\"]\n                },\n               // ConfigurationSetName: \"sendMailConfigurationSet\",\n                Message: {\n                    Body: {\n                        Html: {\n                            Charset: \"UTF-8\",\n                            Data: body\n                        }\n                    },\n                    Subject: { \n                        Charset: \"UTF-8\",\n                        Data: subject \n                    }\n                },\n                Source: \"samarendu84@gmail.com\"\n                \n            };\n            \n            ses.sendEmail(emailParam, function (err, data) {\n                callback(null, {err: err, data: data});\n                if (err) {\n                    console.log(err);\n                    context.fail(err);\n                } else {\n                    console.log(data);\n                    context.succeed(event);\n                }\n                });  \n        }\n    });\n    callback(null, 'Successfully processed ${event.Records.length} records.');\n};"
+        },
+        "FunctionName": "sendTempoClaimEmail",
+        "Handler": "index.handler",
+        "Role": "arn:aws:iam::182388080935:role/sendMailRole",
+        "Runtime": "nodejs10.x"
+      },
+      "Type": "AWS::Lambda::Function"
+    },
+    "claimDetailsTable": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "claimNumber",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "incidentId",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "claimId",
+            "KeyType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_IMAGE"
+        },
+        "TableName": "claimDetailsTable"
+      },
+      "Type": "AWS::DynamoDB::Table"
+    },
+    "deviceDetailTable": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "deviceId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "deviceManufacturer",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "deviceModel",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "deviceName",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "policyNumber",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "deviceId",
+            "KeyType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
+        },
+        "TableName": "deviceDetailTable"
+      },
+      "Type": "AWS::DynamoDB::Table"
+    },
+    "incidentDetailTable": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "incidentId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "details",
+            "AttributeType": "M"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "incidentId",
+            "KeyType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_IMAGE"
+        },
+        "TableName": "incidentDetailTable"
+      },
+      "Type": "AWS::DynamoDB::Table"
+    },
+    "policyDetailsTable": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "policyNumber",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "brokerNumber",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "contact",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "driverDob",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "email",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "firstName",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "lastName",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "language",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "policyNumber",
+            "KeyType": "S"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
+        },
+        "TableName": "policyDetailsTable"
+      },
+      "Type": "AWS::DynamoDB::Table"
+    }
+  }
+}

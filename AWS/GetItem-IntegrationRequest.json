@@ -1,0 +1,8 @@
+{
+  "TableName": "TABLE_NAME",
+  "Key": {
+    "TABLE_KEY": {
+      "S": "$input.params('PATH_PARAM')"
+    }
+  }
+}
